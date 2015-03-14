@@ -34,8 +34,7 @@ class Message < ActiveRecord::Base
   scope :related_to, ->(user) { where('from_user_id = :user_id OR to_user_id = :user_id', user_id: user.id) }
 
   scope :headlines_for, ->(user) do
-    messages = self.find_by_sql([HEADLINES_SQL, {user_id: user.id}])
-    ids = messages.map(&:id)
+    ids = self.find_by_sql([HEADLINES_SQL, {user_id: user.id}]).map(&:id)
     where(id: ids).order(id: :desc)
   end
 
