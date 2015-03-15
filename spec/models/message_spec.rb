@@ -9,11 +9,8 @@ RSpec.describe Message, type: :model do
     expect(Message.count).to be > 0
   end
 
-  describe '::headlines_for' do
-    subject do
-      user = User.find_by_name user_name
-      Message.headlines_for(user).map(&:content)
-    end
+  shared_examples 'headlines' do
+    let(:user) { User.find_by_name user_name }
     context 'はなこ' do
       let(:user_name) { 'はなこ' }
       it { is_expected.to eq %w(何だい、はなこ？ 何のようですか？たかし) }
@@ -28,28 +25,17 @@ RSpec.describe Message, type: :model do
     end
   end
 
+  describe '::headlines_for' do
+    subject do
+      Message.headlines_for(user).map(&:content)
+    end
+    it_behaves_like 'headlines'
+  end
+
   describe 'use HeadlinesFinder' do
-    let(:contents) do
-      user = User.find_by_name user_name
+    subject do
       Messages::HeadlinesFinder.new(user).call.map(&:content)
     end
-    context 'はなこ' do
-      let(:user_name) { 'はなこ' }
-      it 'returns headlines' do
-        expect(contents).to eq %w(何だい、はなこ？ 何のようですか？たかし)
-      end
-    end
-    context 'たかし' do
-      let(:user_name) { 'たかし' }
-      it 'returns headlines' do
-        expect(contents).to eq %w(たかし、来週ひま？ 何のようですか？たかし)
-      end
-    end
-    context 'ひろし' do
-      let(:user_name) { 'ひろし' }
-      it 'returns headlines' do
-        expect(contents).to eq %w(何だい、はなこ？ たかし、来週ひま？)
-      end
-    end
+    it_behaves_like 'headlines'
   end
 end
